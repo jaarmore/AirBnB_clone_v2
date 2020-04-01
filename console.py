@@ -41,7 +41,7 @@ class HBNBCommand(cmd.Cmd):
         try:
             if not line:
                 raise SyntaxError()
-               
+
             THE_list = line.split(" ")
 
             args = []
