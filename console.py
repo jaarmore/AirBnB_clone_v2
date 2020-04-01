@@ -41,8 +41,7 @@ class HBNBCommand(cmd.Cmd):
         try:
             if not line:
                 raise SyntaxError()
-<<<<<<< HEAD
-
+               
             THE_list = line.split(" ")
 
             args = []
@@ -78,35 +77,6 @@ class HBNBCommand(cmd.Cmd):
             obj = eval("{}({})".format(my_list[0], nobj))
             obj.save()
             print("{}".format(obj.id))
-=======
-            THE_list = line.split(" ")
-
-            kwargs = {}
-            for idx in range(1, len(THE_list)):
-                strsd = idx.split("=")
-                if len(strsd) == 2:
-                    key = strsd[0]
-                    value = strsd[1]
-
-                    if value[0] == '"':
-                        value = value.strip('"').replace("_", " ")
-                        kwargs[key] = eval(value)
-                else:
-                    try:
-                        int(value)
-                        kwargs[key] = eval(value)
-                    except Exception:
-                        try:
-                            float(value)
-                            kwargs[key] = eval(value)
-                        except Exception:
-                            pass
-            new_obj = eval("{}()".format(THE_list[0]))
-            for keyn, val in kwargs.items():
-                setattr(new_obj, keyn, val)
-            new_obj.save()
-            print("{}".format(new_obj.id))
->>>>>>> 309c01be82eb52d9023ebd49ef80a73bdf70c726
         except SyntaxError:
             print("** class name missing **")
         except NameError:
