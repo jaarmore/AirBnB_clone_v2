@@ -39,30 +39,44 @@ class HBNBCommand(cmd.Cmd):
             NameError: when there is no object taht has the name
         """
         try:
-            if not arg:
+            if not line:
                 raise SyntaxError()
-            THE_list = arg.split(" ")
 
-            kwargs = {}
-            for idx in range(1, len(THE_list)):
-                key, value = tuple(THE_list[idx].split("="))
-                if value[0] == '"':
-                    value = value.strip('"').replace("_", " ")
-                else:
-                    try:
-                        value = eval(value)
-                    except (SyntaxError, NameError):
-                        continue
-                kwargs[key] = value
+            THE_list = line.split(" ")
 
-            if kwargs == {}:
-                new_obj = eval(THE_list[0])()
-            else:
-                new_obj = eval(THE_list[0])(**kwargs)
-                storage.new(new_obj)
-            print(new_obj.id)
-            new_obj.save()
+            args = []
 
+            for i in THE_list[1:]:
+                try:
+                    srtsp = i.split("=")
+                    x = i
+                    if len(strsp) == 2:
+
+                        if(strsp[1]) == '':
+                            raise ValueError()
+
+                        value = strsp[1]
+
+                        if value[0] == '"' and value[len(value) - 1] == '"':
+                            if '_' in value:
+                                srtsp[1] = str(value.replace('_', ' '))
+                                x = "=".join(strsp)
+
+                        elif value[0] == '"' and value[len(value) - 1] != '"':
+                            raise ValueError()
+                        elif value[0] != '"' and value[len(value) - 1] == '"':
+                            raise ValueError()
+
+                        args.append(x)
+                    else:
+                        raise ValueError()
+                except ValueError:
+                    continue
+
+            nobj = ",".join(args)
+            obj = eval("{}({})".format(my_list[0], nobj))
+            obj.save()
+            print("{}".format(obj.id))
         except SyntaxError:
             print("** class name missing **")
         except NameError:
