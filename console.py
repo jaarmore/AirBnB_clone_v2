@@ -32,37 +32,42 @@ class HBNBCommand(cmd.Cmd):
         """Quit command to exit the program at end of file"""
         return True
 
-    def do_create(self, arg):
+    def do_create(self, line):
         """Creates a new instance of BaseModel, saves it
         Exceptions:
             SyntaxError: when there is no args given
             NameError: when there is no object taht has the name
         """
         try:
-            if not arg:
+            if not line:
                 raise SyntaxError()
-            THE_list = arg.split(" ")
+            THE_list = line.split(" ")
 
             kwargs = {}
             for idx in range(1, len(THE_list)):
-                key, value = tuple(THE_list[idx].split("="))
-                if value[0] == '"':
-                    value = value.strip('"').replace("_", " ")
+                strsd = idx.split("=")
+                if len(strsd) == 2:
+                    key = strsd[0]
+                    value = strsd[1]
+
+                    if value[0] == '"':
+                        value = value.strip('"').replace("_", " ")
+                        kwargs[key] = eval(value)
                 else:
                     try:
-                        value = eval(value)
-                    except (SyntaxError, NameError):
-                        continue
-                kwargs[key] = value
-
-            if kwargs == {}:
-                new_obj = eval(THE_list[0])()
-            else:
-                new_obj = eval(THE_list[0])(**kwargs)
-                storage.new(new_obj)
-            print(new_obj.id)
+                        int(value)
+                        kwargs[key] = eval(value)
+                    except Exception:
+                        try:
+                            float(value)
+                            kwargs[key] = eval(value)
+                        except Exception:
+                            pass
+            new_obj = eval("{}()".format(THE_list[0]))
+            for keyn, val in kwargs.items():
+                setattr(new_obj, keyn, val)
             new_obj.save()
-
+            print("{}".format(new_obj.id))
         except SyntaxError:
             print("** class name missing **")
         except NameError:
@@ -76,28 +81,6 @@ class HBNBCommand(cmd.Cmd):
             IndexError: when there is no id given
             KeyError: when there is no valid id given
         """
-        try:
-            if not line:
-                raise SyntaxError()
-            my_list = line.split(" ")
-            if my_list[0] not in self.all_classes:
-                raise NameError()
-            if len(my_list) < 2:
-                raise IndexError()
-            objects = storage.all()
-            key = my_list[0] + '.' + my_list[1]
-            if key in objects:
-                print(objects[key])
-            else:
-                raise KeyError()
-        except SyntaxError:
-            print("** class name missing **")
-        except NameError:
-            print("** class doesn't exist **")
-        except IndexError:
-            print("** instance id missing **")
-        except KeyError:
-            print("** no instance found **")
 
     def do_destroy(self, line):
         """Deletes an instance based on the class name and id
