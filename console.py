@@ -38,34 +38,35 @@ class HBNBCommand(cmd.Cmd):
             SyntaxError: when there is no args given
             NameError: when there is no object taht has the name
         """
-        if len(arg) == 0:
-            print("** class name missing **")
-            return
         try:
-            arg = shlex.split(arg, posix=False)
-            nobject = eval(arg[0])()
-            for obj in range(len(arg)):
-                if "=" in arg[obj]:
-                    key, value = arg[obj].split("=")
-                    if value[0] == "\"" and value[len(value) - 1] == value[0]:
-                        value = value[1:len(value) - 1]
-                        value = value.replace("_", " ")
-                        for i in range(len(value)):
-                            if value[i] == "\"":
-                                value = value[:i] + "\\" + value[i:]
-                    elif '.' in value:
-                        value = float(value)
-                    elif value.isdigit():
-                        value = int(value)
-                    else:
-                        continue
+            if not arg:
+                raise SyntaxError()
+            THE_list = arg.split(" ")
 
-                    setattr(nobject, key, value)
-            nobj.save()
-            print(nobj.id)
-        except:
+            kwargs = {}
+            for idx in range(1, len(THE_list)):
+                key, value = tuple(THE_list[idx].split("="))
+                if value[0] == '"':
+                    value = value.strip('"').replace("_", " ")
+                else:
+                    try:
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+                        continue
+                kwargs[key] = value
+
+            if kwargs == {}:
+                new_obj = eval(THE_list[0])()
+            else:
+                new_obj = eval(THE_list[0])(**kwargs)
+                storage.new(new_obj)
+            print(new_obj.id)
+            new_obj.save()
+
+        except SyntaxError:
+            print("** class name missing **")
+        except NameError:
             print("** class doesn't exist **")
-      
 
     def do_show(self, line):
         """Prints the string representation of an instance
