@@ -1,5 +1,11 @@
 #!/usr/bin/python3
-"""This is the console for AirBnB"""
+"""AirBnB Clone - Console
+This module creates a command interpreter to AirBnb Clone
+Uses the cmd module
+Holberton School
+Foundations - Higher-level programming - Python
+By Iván Darío Lasso and Kevin Castro
+"""
 import cmd
 from models import storage
 from datetime import datetime
@@ -10,13 +16,14 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
+import shlex
 from shlex import split
 
 
 class HBNBCommand(cmd.Cmd):
     """this class is entry point of the command interpreter
     """
-    prompt = "(hbnb) "
+    prompt = "(hbnb2) "
     all_classes = {"BaseModel", "User", "State", "City",
                    "Amenity", "Place", "Review"}
 
@@ -41,49 +48,95 @@ class HBNBCommand(cmd.Cmd):
         try:
             if not line:
                 raise SyntaxError()
+
             THE_list = line.split(" ")
 
-            kwargs = {}
-            for idx in range(1, len(THE_list)):
-                strsd = idx.split("=")
-                if len(strsd) == 2:
-                    key = strsd[0]
-                    value = strsd[1]
+            args = []
 
-                    if value[0] == '"':
-                        value = value.strip('"').replace("_", " ")
-                        kwargs[key] = eval(value)
-                else:
-                    try:
-                        int(value)
-                        kwargs[key] = eval(value)
-                    except Exception:
-                        try:
-                            float(value)
-                            kwargs[key] = eval(value)
-                        except Exception:
-                            pass
-            new_obj = eval("{}()".format(THE_list[0]))
-            for keyn, val in kwargs.items():
-                setattr(new_obj, keyn, val)
-            new_obj.save()
-            print("{}".format(new_obj.id))
+            for i in THE_list[1:]:
+                try:
+                    srtsp = i.split("=")
+                    x = i
+                    if len(strsp) == 2:
+
+                        if(strsp[1]) == '':
+                            raise ValueError()
+
+                        value = strsp[1]
+
+                        if value[0] == '"' and value[len(value) - 1] == '"':
+                            if '_' in value:
+                                srtsp[1] = str(value.replace('_', ' '))
+                                x = "=".join(strsp)
+
+                        elif value[0] == '"' and value[len(value) - 1] != '"':
+                            raise ValueError()
+                        elif value[0] != '"' and value[len(value) - 1] == '"':
+                            raise ValueError()
+
+                        args.append(x)
+                    else:
+                        raise ValueError()
+                except ValueError:
+                    continue
+
+            nobj = ",".join(args)
+            obj = eval("{}({})".format(my_list[0], nobj))
+            obj.save()
+            print("{}".format(obj.id))
         except SyntaxError:
             print("** class name missing **")
         except NameError:
             print("** class doesn't exist **")
 
     def do_show(self, line):
-        """Prints the string representation of an instance
+        """
+        Prints the string representation of an instance based in cl
+ass
+        and instance id.
+        Use: show <class name> <id>
+        Ex: show BaseModel b9132a3f-0ffd-49df-950d-7b257dcddbc7
+           Args:
+               arg (str): The name of the class and id, separated b
+y space
         Exceptions:
             SyntaxError: when there is no args given
             NameError: when there is no object taht has the name
             IndexError: when there is no id given
             KeyError: when there is no valid id given
         """
+        try:
+            if not line:
+                raise SyntaxError()
+            my_list = line.split(" ")
+            if my_list[0] not in self.all_classes:
+                raise NameError()
+            if len(my_list) < 2:
+                raise IndexError()
+            objects = storage.all()
+            key = my_list[0] + '.' + my_list[1]
+            if key in objects:
+                print(objects[key])
+            else:
+                raise KeyError()
+        except SyntaxError:
+            print("** class name missing **")
+        except NameError:
+            print("** class doesn't exist **")
+        except IndexError:
+            print("** instance id missing **")
+        except KeyError:
+            print("** no instance found **")
 
     def do_destroy(self, line):
-        """Deletes an instance based on the class name and id
+        """
+        Deletes an instance based on the class name and id.
+        And update JSON File.
+        Use: destroy <class name> <id>
+        Ex: destroy BaseModel b9132a3f-0ffd-49df-950d-7b257dcddbc7
+        Args:
+            arg (str): The name of the class and id, separated by s
+pace.
         Exceptions:
             SyntaxError: when there is no args given
             NameError: when there is no object taht has the name
@@ -115,7 +168,16 @@ class HBNBCommand(cmd.Cmd):
             print("** no instance found **")
 
     def do_all(self, line):
-        """Prints all string representation of all instances
+        """
+        Prints all string representation of all instances
+        based or not on the class name.
+        Use: all <class name> (optional)
+        Ex: all              # This prints all instances of all cla
+sses
+            all BaseModel    # This prints all instances of BaseMod
+el
+        Args:
+            arg (str): Name of the class
         Exceptions:
             NameError: when there is no object taht has the name
         """
@@ -139,7 +201,16 @@ class HBNBCommand(cmd.Cmd):
             print("** class doesn't exist **")
 
     def do_update(self, line):
-        """Updates an instanceby adding or updating attribute
+        """
+        Updates an instance based on the class name, id and attribu
+tes.
+        Use: update <class name> <id> <attribute name> "<attribute
+value>"
+        Ex: update User 49faff9a-6318-451f-87b6-910505c55907 first_
+name "Betty"
+        Args:
+            arg (str): The name of the class, id, attrubute and
+                       value separated by space.
         Exceptions:
             SyntaxError: when there is no args given
             NameError: when there is no object taht has the name
@@ -184,7 +255,12 @@ class HBNBCommand(cmd.Cmd):
             print("** value missing **")
 
     def count(self, line):
-        """count the number of instances of a class
+        """
+        Count and prints all instance off a class name.
+        Use: count(<class name>)
+        Ex: count(arg) where arg is User class ("User")
+        Args:
+            arg (str): The name of the class
         """
         counter = 0
         try:
@@ -226,6 +302,18 @@ class HBNBCommand(cmd.Cmd):
     def default(self, line):
         """retrieve all instances of a class and
         retrieve the number of instances
+        execute when command doesnt exist.
+        Ex: User.count() its not do_XXX funtion, then default logic
+al
+            is excecuted and eval if it is count instance requireme
+nt.
+        Ex: User.all() its not do_XXX funtion, then default logical
+            is excecuted and eval if it is all display user instanc
+e
+            requirement.
+        Args: string could be <class name>.funcion where function r
+eferes to
+              an expecific propose(see Ex.)
         """
         my_list = line.split('.')
         if len(my_list) >= 2:
