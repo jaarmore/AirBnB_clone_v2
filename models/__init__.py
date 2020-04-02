@@ -8,7 +8,15 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
+from os import getenv
 
+typeStorage = getenv("HBNB_TYPE_STORAGE")
 
-storage = FileStorage()
+if typeStorage != 'db':
+    from models.engine.file_storage import FileStorage
+    storage = FileStorage()
+else:  # to JSON File
+    from models.engine.db_storage import DBStorage
+    storage = DBStorage()
+
 storage.reload()
