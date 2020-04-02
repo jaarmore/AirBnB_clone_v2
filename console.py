@@ -1,11 +1,5 @@
 #!/usr/bin/python3
-"""AirBnB Clone - Console
-This module creates a command interpreter to AirBnb Clone
-Uses the cmd module
-Holberton School
-Foundations - Higher-level programming - Python
-By Iván Darío Lasso and Kevin Castro
-"""
+"""This is the console for AirBnB"""
 import cmd
 from models import storage
 from datetime import datetime
@@ -16,7 +10,6 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
-import shlex
 from shlex import split
 
 
@@ -37,53 +30,52 @@ class HBNBCommand(cmd.Cmd):
 
     def do_EOF(self, line):
         """Quit command to exit the program at end of file"""
+        print("")
         return True
 
     def do_create(self, line):
-        """
-        Creates a new instance of a ClassName and saves it (to the
-JSON file)
+        """Creates a new instance of BaseModel, saves it
+        Exceptions:
+            SyntaxError: when there is no args given
+            NameError: when there is no object taht has the name
         """
         try:
             if not line:
                 raise SyntaxError()
             my_list = line.split(" ")
+            dictu = {}
+            for item in my_list[1:]:
+                strspd = item.split("=")
 
-            kwargs = {}
-            for i in range(1, len(my_list)):
-                key, value = tuple(my_list[i].split("="))
-                if value[0] == '"':
-                    value = value.strip('"').replace("_", " ")
-                else:
-                    try:
-                        value = eval(value)
-                    except (SyntaxError, NameError):
-                        continue
-                kwargs[key] = value
+                if len(strspd) == 2:
+                    key = strspd[0]
+                    val = strspd[1]
+                    if val[0] == '"':
+                        val = val.replace("_", " ")
+                        dictu[key] = eval(val)
+                    else:
+                        try:
+                            int(val)
+                            dictu[key] = eval(val)
+                        except Exception:
+                            try:
+                                float(val)
+                                dictu[key] = eval(val)
+                            except Exception:
+                                pass
 
-            if kwargs == {}:
-                obj = eval(my_list[0])()
-            else:
-                obj = eval(my_list[0])(**kwargs)
-                storage.new(obj)
-            print(obj.id)
+            obj = eval("{}()".format(my_list[0]))
+            for key, val in dictu.items():
+                setattr(obj, key, val)
             obj.save()
-
+            print("{}".format(obj.id))
         except SyntaxError:
             print("** class name missing **")
         except NameError:
             print("** class doesn't exist **")
 
     def do_show(self, line):
-        """
-        Prints the string representation of an instance based in cl
-ass
-        and instance id.
-        Use: show <class name> <id>
-        Ex: show BaseModel b9132a3f-0ffd-49df-950d-7b257dcddbc7
-           Args:
-               arg (str): The name of the class and id, separated b
-y space
+        """Prints the string representation of an instance
         Exceptions:
             SyntaxError: when there is no args given
             NameError: when there is no object taht has the name
@@ -114,14 +106,7 @@ y space
             print("** no instance found **")
 
     def do_destroy(self, line):
-        """
-        Deletes an instance based on the class name and id.
-        And update JSON File.
-        Use: destroy <class name> <id>
-        Ex: destroy BaseModel b9132a3f-0ffd-49df-950d-7b257dcddbc7
-        Args:
-            arg (str): The name of the class and id, separated by s
-pace.
+        """Deletes an instance based on the class name and id
         Exceptions:
             SyntaxError: when there is no args given
             NameError: when there is no object taht has the name
@@ -153,22 +138,13 @@ pace.
             print("** no instance found **")
 
     def do_all(self, line):
-        """
-        Prints all string representation of all instances
-        based or not on the class name.
-        Use: all <class name> (optional)
-        Ex: all              # This prints all instances of all cla
-sses
-            all BaseModel    # This prints all instances of BaseMod
-el
-        Args:
-            arg (str): Name of the class
+        """Prints all string representation of all instances
         Exceptions:
             NameError: when there is no object taht has the name
         """
-        objects = storage.all()
         my_list = []
         if not line:
+            objects = storage.all()
             for key in objects:
                 my_list.append(objects[key])
             print(my_list)
@@ -177,6 +153,8 @@ el
             args = line.split(" ")
             if args[0] not in self.all_classes:
                 raise NameError()
+
+            objects = storage.all(eval(args[0]))
             for key in objects:
                 name = key.split('.')
                 if name[0] == args[0]:
@@ -186,16 +164,7 @@ el
             print("** class doesn't exist **")
 
     def do_update(self, line):
-        """
-        Updates an instance based on the class name, id and attribu
-tes.
-        Use: update <class name> <id> <attribute name> "<attribute
-value>"
-        Ex: update User 49faff9a-6318-451f-87b6-910505c55907 first_
-name "Betty"
-        Args:
-            arg (str): The name of the class, id, attrubute and
-                       value separated by space.
+        """Updates an instanceby adding or updating attribute
         Exceptions:
             SyntaxError: when there is no args given
             NameError: when there is no object taht has the name
@@ -240,12 +209,7 @@ name "Betty"
             print("** value missing **")
 
     def count(self, line):
-        """
-        Count and prints all instance off a class name.
-        Use: count(<class name>)
-        Ex: count(arg) where arg is User class ("User")
-        Args:
-            arg (str): The name of the class
+        """count the number of instances of a class
         """
         counter = 0
         try:
@@ -287,18 +251,6 @@ name "Betty"
     def default(self, line):
         """retrieve all instances of a class and
         retrieve the number of instances
-        execute when command doesnt exist.
-        Ex: User.count() its not do_XXX funtion, then default logic
-al
-            is excecuted and eval if it is count instance requireme
-nt.
-        Ex: User.all() its not do_XXX funtion, then default logical
-            is excecuted and eval if it is all display user instanc
-e
-            requirement.
-        Args: string could be <class name>.funcion where function r
-eferes to
-              an expecific propose(see Ex.)
         """
         my_list = line.split('.')
         if len(my_list) >= 2:
