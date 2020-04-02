@@ -3,9 +3,8 @@
 import uuid
 import models
 from datetime import datetime
-from sqlalchemy import String, DateTime, Column
 from sqlalchemy.ext.declarative import declarative_base
-
+from sqlalchemy import Column, Integer, String, DateTime
 
 Base = declarative_base()
 
@@ -14,11 +13,9 @@ class BaseModel:
     """This class will defines all common attributes/methods
     for other classes
     """
-
-    id = Column(String(60), nullable=False, unique=True,
-                primary_key=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow())
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow())
+    id = Column(String(60), primary_key=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
     def __init__(self, *args, **kwargs):
         """Instantiation of base model class
@@ -33,6 +30,8 @@ class BaseModel:
         if kwargs:
             """if self.id is None:"""
             self.id = str(uuid.uuid4())
+            """:wqself.created_at = datetime.now()"""
+            """self.updated_at = datetime.now()"""
             for key, value in kwargs.items():
                 if key == "created_at" or key == "updated_at":
                     value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
@@ -72,4 +71,10 @@ class BaseModel:
         my_dict["__class__"] = str(type(self).__name__)
         my_dict["created_at"] = self.created_at.isoformat()
         my_dict["updated_at"] = self.updated_at.isoformat()
-        return my_dict
+        keyFDel = "_sa_instance_state"
+        if keyFDel in my_dict:
+            del my_dict[keyFDel]
+
+    def delete(self):
+        """delete the current instance from the storage """
+        models.storage.delete(self)
