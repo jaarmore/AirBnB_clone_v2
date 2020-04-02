@@ -52,3 +52,18 @@ Ex:
 Additionally, the console supports `<class name>.<command>(<parameters>)` syntax.
 Ex:
 `City.show(my_city_id)`
+
+### File Storage
+The File Storage system manages the serialization and deserialization of all the data, following a JSON format.
+
+A FileStorage class is defined in file_storage.py with methods to follow this flow:
+```
+<object> -> to_dict() -> <dictionary> -> JSON dump -> <json string> -> FILE -> <json string> -> JSON load -> <dictionary> -> <object>
+
+```
+
+### DataBase Storage
+The DataBase Storage system manages communication to and from a `MySQL server`, where data will be stored in a database depending on the `HBNB_MYSQL_DB` variable value.
+
+
+### [AUTHORS](AUTHORS)
