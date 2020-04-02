@@ -1,4 +1,3 @@
-#!/usr/bin/python3
 """ Storage class for DB for AirBnB Clone_V2 """
 from os import getenv
 from models.base_model import BaseModel, Base
@@ -26,17 +25,15 @@ class DBStorage():
         host = getenv("HBNB_MYSQL_HOST")
         dataBase = getenv("HBNB_MYSQL_DB")
         HBNB_ENV = getenv("HBNB_ENV")
-
         dbConnector = 'mysql+mysqldb://{}:{}@{}/{}'
         self.__engine = create_engine(dbConnector.format(
             user, pwd, host, dataBase), pool_pre_ping=True)
-
         if HBNB_ENV == "test":
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
         """ query all objects depending of the class name """
-        classes = ['State', 'City', 'User']
+        classes = ['State', 'City', 'User', 'Place']
         class_dict = {}
         if cls and cls in classes:
             # busca por el tipo de objeto
