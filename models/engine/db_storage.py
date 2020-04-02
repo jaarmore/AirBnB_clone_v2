@@ -22,14 +22,14 @@ class DBStorage():
     def __init__(self):
         """ Constructor """
         user = getenv("HBNB_MYSQL_USER")
-        password = getenv("HBNB_MYSQL_PWD")
+        pwd = getenv("HBNB_MYSQL_PWD")
         host = getenv("HBNB_MYSQL_HOST")
         dataBase = getenv("HBNB_MYSQL_DB")
         HBNB_ENV = getenv("HBNB_ENV")
 
         dbConnector = 'mysql+mysqldb://{}:{}@{}/{}'
         self.__engine = create_engine(dbConnector.format(
-            user, password, host, dataBase), pool_pre_ping=True)
+            user, pwd, host, dataBase), pool_pre_ping=True)
 
         if HBNB_ENV == "test":
             Base.metadata.drop_all(self.__engine)
@@ -37,19 +37,20 @@ class DBStorage():
     def all(self, cls=None):
         """ query all objects depending of the class name """
         classes = ['State', 'City']
-        cdict = {}
+        class_dict = {}
         if cls and cls in classes:
+            # busca por el tipo de objeto
             _object = self.__session.query(cls).all()
             for _obj in _object:
                 key = type(_obj).__name__ + '.' + _obj.id
-                cdict[key] = _obj
+                class_dict[key] = _obj
         else:
             for _class in classes:
                 _object = self.__session.query(eval(_class)).all()
                 for _obj in _object:
                     key = type(_obj).__name__ + '.' + _obj.id
                     class_dict[key] = _obj
-        return cdict
+        return class_dict
 
     def new(self, obj):
         """ add the object to the current database session """
@@ -67,6 +68,7 @@ class DBStorage():
     def reload(self):
         """Reload objects """
         Base.metadata.create_all(self.__engine)
+        # sess_factory=sessionmaker(bind=self.__engine,expire_on_commit=False)
         Session = scoped_session(sessionmaker(
             bind=self.__engine, expire_on_commit=False))
         self.__session = Session()

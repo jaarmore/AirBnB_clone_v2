@@ -25,9 +25,9 @@ class State(BaseModel, Base):
     if getenv("HBNB_TYPE_STORAGE") == "file":
         @property
         def cities(self):
-            lcities = []
-            dcities = models.Storage.all(City)
-            for city in dcities.items():
+            list_of_cities = []
+            dic_cities = models.Storage.all(City)
+            for city in dic_cities.items():
                 if city.state_id == self.id:
-                    lcities.append(city)
-            return lcities
+                    list_of_cities.append(city)
+            return list_of_cities

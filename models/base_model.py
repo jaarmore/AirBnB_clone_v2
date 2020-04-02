@@ -28,8 +28,8 @@ class BaseModel:
             updated_at: updated date
         """
         if kwargs:
-            """if self.id is None:"""
-            self.id = str(uuid.uuid4())
+            """if self.id is None:
+            self.id = str(uuid.uuid4())"""
             """:wqself.created_at = datetime.now()"""
             """self.updated_at = datetime.now()"""
             for key, value in kwargs.items():
