@@ -10,12 +10,12 @@ from models.place import Place
 from models.review import Review
 from os import getenv
 
-typeStorage = getenv("HBNB_TYPE_STORAGE")
+tStorage = getenv("HBNB_TYPE_STORAGE")
 
-if typeStorage != 'db':
+if tStorage != 'db':
     from models.engine.file_storage import FileStorage
     storage = FileStorage()
-else:  # to JSON File
+else:
     from models.engine.db_storage import DBStorage
     storage = DBStorage()
 
