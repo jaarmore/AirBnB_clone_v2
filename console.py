@@ -43,64 +43,32 @@ class HBNBCommand(cmd.Cmd):
         """
         Creates a new instance of a ClassName and saves it (to the
 JSON file)
-        and return the id of the new instance.
-        Use: create <class name>
-        Ex: create BaseModel
-        Args:
-            arg (str): Name of the class to create instance
-                       (BaseModel, User, State, City, Amenity, Plac
-e, Review).
-        Exceptions:
-            SyntaxError: when there is no args given
-            NameError: when there is no object taht has the name
-        History:
-        Date: 30-Mzo-2020
-        do_create: read all arguments and coverts in kwargs to create object
         """
         try:
             if not line:
                 raise SyntaxError()
-
             my_list = line.split(" ")
 
-            listakwargs = []
+            kwargs = {}
+            for i in range(1, len(my_list)):
+                key, value = tuple(my_list[i].split("="))
+                if value[0] == '"':
+                    value = value.strip('"').replace("_", " ")
+                else:
+                    try:
+                        value = eval(value)
+                    except (SyntaxError, NameError):
+                        continue
+                kwargs[key] = value
 
-            for i in my_list[1:]:
-                try:
-                    # check params. Param syntax: <key name>=<value>
-                    listasplit = i.split("=")
-                    x = i
-
-                    # if param doesnt fit is ignored(skiped)
-                    if len(listasplit) == 2:
-
-                        if(listasplit[1]) == '':
-                            raise ValueError()
-
-                        value = listasplit[1]
-
-                        # validate value string syntax
-                        if value[0] == '"' and value[len(value) - 1] == '"':
-                            # replace "_" for space to store
-                            if '_' in value:
-                                listasplit[1] = str(value.replace('_', ' '))
-                                x = "=".join(listasplit)
-
-                        elif value[0] == '"' and value[len(value) - 1] != '"':
-                            raise ValueError()
-                        elif value[0] != '"' and value[len(value) - 1] == '"':
-                            raise ValueError()
-
-                        listakwargs.append(x)
-                    else:
-                        raise ValueError()
-                except ValueError:
-                    continue
-
-            ka = ",".join(listakwargs)
-            obj = eval("{}({})".format(my_list[0], ka))
+            if kwargs == {}:
+                obj = eval(my_list[0])()
+            else:
+                obj = eval(my_list[0])(**kwargs)
+                storage.new(obj)
+            print(obj.id)
             obj.save()
-            print("{}".format(obj.id))
+
         except SyntaxError:
             print("** class name missing **")
         except NameError:
