@@ -29,7 +29,9 @@ class FileStorage:
             return self.__objects
         dictu = {}
         for key, value in self.__objects.items():
-            if value.__class__ == cls:
+            nclass = cls.__name__
+            nobj = type(value).__name__
+            if nclass == nobj:
                 dictu[key] = value
         return dictu
 
