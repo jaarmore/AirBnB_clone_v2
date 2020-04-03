@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 """ Storage class for DB for AirBnB Clone_V2 """
 from os import getenv
 from models.base_model import BaseModel, Base
@@ -33,7 +34,7 @@ class DBStorage():
 
     def all(self, cls=None):
         """ query all objects depending of the class name """
-        classes = ['State', 'City', 'User', 'Place', 'Review']
+        classes = ['State', 'City', 'User', 'Place', 'Review', 'Amenity']
         class_dict = {}
         if cls and cls in classes:
             # busca por el tipo de objeto
@@ -65,7 +66,6 @@ class DBStorage():
     def reload(self):
         """Reload objects """
         Base.metadata.create_all(self.__engine)
-        # sess_factory=sessionmaker(bind=self.__engine,expire_on_commit=False)
         Session = scoped_session(sessionmaker(
             bind=self.__engine, expire_on_commit=False))
         self.__session = Session()
