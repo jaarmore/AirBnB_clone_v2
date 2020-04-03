@@ -1,5 +1,8 @@
 #!/usr/bin/python3
 """This is the place class"""
+from models.city import City
+from models.amenity import Amenity
+from models.review import Review
 from os import getenv
 from sqlalchemy import Column
 from sqlalchemy import Float
