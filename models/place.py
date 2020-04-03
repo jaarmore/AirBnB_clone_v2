@@ -1,20 +1,22 @@
 #!/usr/bin/python3
 """This is the place class"""
-import models
+import os
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, Integer, Float, ForeignKey, Table
+from sqlalchemy import Column, Integer, String, Float, Table
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
-from os import getenv
 
-place_amenity = Table("place_amenity", Base.metadata,
-                      Column("place_id", String(60),
-                             ForeignKey("places.id"),
-                             primary_key=True,
-                             nullable=False),
-                      Column("amenity_id", String(60),
-                             ForeignKey("amenities.id"),
-                             primary_key=True,
-                             nullable=False))
+place_amenity = Table('place_amenity', Base.metadata,
+                      Column('place_id',
+                             String(60),
+                             ForeignKey('places.id'),
+                             nullable=False,
+                             primary_key=True),
+                      Column('amenity_id',
+                             String(60),
+                             ForeignKey('amenities.id'),
+                             nullable=False,
+                             primary_key=True))
 
 
 class Place(BaseModel, Base):
@@ -33,8 +35,8 @@ class Place(BaseModel, Base):
         amenity_ids: list of Amenity ids
     """
     __tablename__ = "places"
-    city_id = Column(String(60), ForeignKey("cities.id"), nullable=False)
-    user_id = Column(String(60), ForeignKey("users.id"), nullable=False)
+    city_id = Column(String(60), ForeignKey('cities.id'), nullable=False)
+    user_id = Column(String(60), ForeignKey('users.id'), nullable=False)
     name = Column(String(128), nullable=False)
     description = Column(String(1024), nullable=True)
     number_rooms = Column(Integer, nullable=False, default=0)
@@ -43,31 +45,36 @@ class Place(BaseModel, Base):
     price_by_night = Column(Integer, nullable=False, default=0)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
-    reviews = relationship("Review", backref="place", cascade="all, delete")
-    amenities = relationship("Amenity", secondary=place_amenity,
-                             viewonly=False)
     amenity_ids = []
-    if getenv("HBNB_TYPE_STORAGE") != "db":
+    reviews = relationship("Review",
+                           backref="place", cascade="all, delete")
+    amenities = relationship("Amenity",
+                             secondary=place_amenity,
+                             viewonly=False)
+    if os.getenv('HBNB_TYPE_STORAGE') != 'db':
+
         @property
         def reviews(self):
-            """Get reviews"""
-            list_return = []
-            for row in list(models.storage.all(Review).values()):
-                if row.place_id == self.id:
-                    list_return.append(row)
-            return list_return
+            """returns the list of Review instances"""
+            review_list = []
+            objs_ = models.storage.all(Review)
+            for key, value in objs_.items():
+                if value.place_id == self.id:
+                    review_list.append(value)
+            return review_list
 
         @property
         def amenities(self):
-            """Get/set linked Amenities."""
-            list_return = []
-            for row in list(models.storage.all(Amenity).values()):
-                if row.id in self.amenity_ids:
-                    list_return.append(row)
-            return list_return
+            """returns the list of Amenities instances"""
+            amenity_list = []
+            objs_ = models.storage.all(Amenity)
+            for key, value in objs_.items():
+                if value.id in self.amenity_ids:
+                    amenity_list.append(value)
+            return amenity_list
 
         @amenities.setter
-        def amenities(self, value):
-            """Set amenity value"""
-            if type(value).__name__ == 'Amenity':
-                self.amenity_ids.append(value.id)
+        def amenities(self, obj):
+            """set the ids of the amenities"""
+            if typr(obj).__name__ == "Amenity":
+                self.amenity_ids.append(obj.id)
